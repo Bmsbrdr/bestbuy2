@@ -1,6 +1,6 @@
 class Product:
     def __init__(self, name: str, price: float, quantity: int):
-        if name is "":
+        if name == "":
             raise ValueError("Name cannot be empty")
         try :
             self.price = float(price)
@@ -31,8 +31,8 @@ class Product:
     def is_active(self) -> bool:
         return self.active
     # Show's all important data about the product, including name, price and quantity.
-    def show(self):
-        print(f"Product: {self.name}\r\nPrice per unit: {self.price}\r\nQuantity:{self.quantity}\r\n")
+    def show(self) -> str:
+        return f"Product: {self.name}\r\nPrice per unit: {self.price}\r\nQuantity:{self.quantity}\r\n"
 
     def check_stock(self, desired_quantity):
         current_quantity = self.get_quantity()
@@ -40,7 +40,7 @@ class Product:
 
     # function which handles the buying process, including substraction of the total amount. It also prints out the
     # amount left and the total price of this transaction.
-    def buy(self, quantity: float) -> float:
+    def buy(self, quantity: float) -> tuple[str,float]:
         if quantity <= 0:
             raise ValueError("Quantity is less than 0")
         if not self.check_stock(quantity):
@@ -49,8 +49,20 @@ class Product:
         total_left = self.quantity - quantity
         self.set_quantity(total_left)
         total_price = self.price * quantity
-        print (f"{quantity} items of {self.name} cost {total_price}"
-               f"\r\nCompleting the deal..."
-               f"\r\nThere are still {total_left} items left"
-               f"\r\nThanks for your purchase!\r\n")
-        return total_price
+        return_text = (f"{quantity} items of {self.name} cost {total_price}"
+                        f"\r\nCompleting the deal..."
+                        f"\r\nThere are still {total_left} items left"
+                        f"\r\nThanks for your purchase!\r\n")
+        return return_text, total_price
+class NonStockedProduct(Product):
+    def __init__(self, name: str,price: float):
+        super().__init__(name, price,0)
+    def show(self) -> str:
+        return f"**** Non Stocked Product ****\r\nProduct: {self.name}\r\nPrice per unit: {self.price}\r\n"
+
+class LimitedProduct(Product):
+    def __init__(self, name: str, price: float, quantity: int, maximum: int):
+        self.maximum = maximum
+        super().__init__(name, price, quantity)
+    def show(self) -> str:
+        return f"**** Limited Product (Max 1 per order) ****\r\nProduct: {self.name}\r\nPrice per unit: {self.price}\r\nQuantity:{self.quantity}\r\n"

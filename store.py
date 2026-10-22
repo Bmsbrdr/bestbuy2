@@ -1,4 +1,4 @@
-from products import Product
+from products import Product, NonStockedProduct
 class Store:
 
     #products = [Product]
@@ -38,6 +38,9 @@ class Store:
             if not any(item.name == product.name for item in self.products):
                 raise AttributeError(f"Product {product.name} has not been added")
             target_product = self.find_product_by_name(product.name)
+            if isinstance(target_product, NonStockedProduct):
+                total_price += target_product.price * quantity
+                continue
             stored_enough = target_product.quantity > quantity
             if not stored_enough:
                 raise ValueError(f"Not Enough {product.name} in stock!")
