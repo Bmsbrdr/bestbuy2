@@ -1,3 +1,4 @@
+from promotions import Promotion
 class Product:
     def __init__(self, name: str, price: float, quantity: int):
         if name == "":
@@ -18,6 +19,23 @@ class Product:
         self.price :float= price
         self.quantity :int = quantity
         self.active :bool = True
+        self.__promotion: Promotion | None = None
+    @property
+    def promotion(self) -> Promotion | None:
+        return self.__promotion
+
+    @promotion.setter
+    def promotion(self, promotion : Promotion):
+        self.__promotion = promotion
+
+    def promotion_text(self) -> str:
+        return f"Promotion: {self.promotion.name}\r\n" if self.promotion else ""
+
+    def get_total_price(self, quantity: int) -> float:
+        total = self.price * quantity
+        if self.promotion:
+            total -= self.promotion.get_discount(quantity, total)
+        return round(total, 2)
 
     def get_quantity(self) -> int:
         return self.quantity
@@ -32,7 +50,7 @@ class Product:
         return self.active
     # Show's all important data about the product, including name, price and quantity.
     def show(self) -> str:
-        return f"Product: {self.name}\r\nPrice per unit: {self.price}\r\nQuantity:{self.quantity}\r\n"
+        return f"Product: {self.name}\r\nPrice per unit: {self.price}\r\nQuantity:{self.quantity}\r\n" + self.promotion_text()
 
     def check_stock(self, desired_quantity):
         current_quantity = self.get_quantity()
@@ -48,7 +66,7 @@ class Product:
 
         total_left = self.quantity - quantity
         self.set_quantity(total_left)
-        total_price = self.price * quantity
+        total_price = self.get_total_price(quantity)
         return_text = (f"{quantity} items of {self.name} cost {total_price}"
                         f"\r\nCompleting the deal..."
                         f"\r\nThere are still {total_left} items left"
@@ -58,11 +76,11 @@ class NonStockedProduct(Product):
     def __init__(self, name: str,price: float):
         super().__init__(name, price,0)
     def show(self) -> str:
-        return f"**** Non Stocked Product ****\r\nProduct: {self.name}\r\nPrice per unit: {self.price}\r\n"
+        return f"**** Non Stocked Product ****\r\nProduct: {self.name}\r\nPrice per unit: {self.price}\r\n" + self.promotion_text()
 
 class LimitedProduct(Product):
     def __init__(self, name: str, price: float, quantity: int, maximum: int):
         self.maximum = maximum
         super().__init__(name, price, quantity)
     def show(self) -> str:
-        return f"**** Limited Product (Max 1 per order) ****\r\nProduct: {self.name}\r\nPrice per unit: {self.price}\r\nQuantity:{self.quantity}\r\n"
+        return f"**** Limited Product (Max 1 per order) ****\r\nProduct: {self.name}\r\nPrice per unit: {self.price}\r\nQuantity:{self.quantity}\r\n" + self.promotion_text()

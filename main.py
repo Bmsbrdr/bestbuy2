@@ -1,4 +1,5 @@
 from products import Product, NonStockedProduct, LimitedProduct
+from promotions import Promotion, SecondHalfPricePromotion, ThirdOneFreePromotion, PercentDiscountPromotion
 from store import Store
 
 def start(store: Store):
@@ -80,8 +81,19 @@ product_list = [ Product("MacBook Air M2", price=1450, quantity=100),
                  Product("Bose QuietComfort Earbuds", price=250, quantity=500),
                  Product("Google Pixel 7", price=500, quantity=250),
                  NonStockedProduct("Windows License", price=125),
-                 LimitedProduct("Shipping", price=10, quantity=250, maximum=1),
-                 LimitedProduct("Fan Rag", price=10, quantity=250, maximum=2)
+                 LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
                ]
+
+# Create promotion catalog
+second_half_price = SecondHalfPricePromotion("Second Half price!")
+third_one_free = ThirdOneFreePromotion("Third One Free!")
+thirty_percent = PercentDiscountPromotion("30% off!", percent=30)
+
+# Add promotions to products
+product_list[0].promotion = second_half_price
+product_list[1].promotion = third_one_free
+product_list[3].promotion = thirty_percent
+
+
 best_buy = Store(product_list)
 start(best_buy)

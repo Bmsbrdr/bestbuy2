@@ -39,11 +39,11 @@ class Store:
                 raise AttributeError(f"Product {product.name} has not been added")
             target_product = self.find_product_by_name(product.name)
             if isinstance(target_product, NonStockedProduct):
-                total_price += target_product.price * quantity
+                total_price += target_product.get_total_price(quantity)
                 continue
             stored_enough = target_product.quantity > quantity
             if not stored_enough:
                 raise ValueError(f"Not Enough {product.name} in stock!")
-            total_price += target_product.price * quantity
+            total_price += target_product.get_total_price(quantity)
             target_product.quantity -= quantity
         return total_price
