@@ -46,7 +46,7 @@ def test_product_get_price_zero_fail(generate_coffee):
 def test_product_get_quantity_success(generate_coffee):
     coffee = Product("Coffee", 50, 50)
     target_quantity = 50
-    result = coffee.get_quantity()
+    result = coffee.quantity
     assert result == target_quantity
 
 def test_product_get_active_state_success(generate_coffee):

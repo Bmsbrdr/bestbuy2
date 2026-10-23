@@ -35,8 +35,8 @@ def test_non_stocked_discount_and_repeated_orders():
     assert store.order([(product, 2)]) == 175
     assert store.order([(product, 1)]) == 87.5
     assert product.quantity == 0
-    assert product.is_active()
-    assert "30% off" in product.show()
+    assert product.active
+    assert "30% off" in str(product)
 
 
 @pytest.mark.parametrize("percent", [-1, 101])
@@ -48,5 +48,5 @@ def test_invalid_percentage(percent):
 def test_product_without_promotion():
     product = Product("Coffee", 50, 10)
     assert product.promotion is None
-    assert "Promotion:" not in product.show()
+    assert "Promotion:" not in str(product)
     assert Store([product]).order([(product, 2)]) == 100

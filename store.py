@@ -1,49 +1,50 @@
-from products import Product, NonStockedProduct
+from products import Product, validate_quantity
+
+
 class Store:
-
-    #products = [Product]
-
     def __init__(self, products: list[Product]):
-        self.products = products
+        self.products = list(products)
 
     def add_product(self, product: Product):
         self.products.append(product)
+
     def remove_product(self, product: Product):
         self.products.remove(product)
 
-    def get_total_quantity(self):
-        total = 0
-        for product in self.products:
-            total += product.get_quantity()
-        return total
+    @property
+    def total_quantity(self) -> int:
+        return sum(product.quantity for product in self.products)
 
-    def get_all_products(self) -> list[Product]:
-        result = []
-        for product in self.products:
-            if product.active:
-                result.append(product)
-        return result
+    @property
+    def all_products(self) -> list[Product]:
+        return [product for product in self.products if product.active]
 
-    def find_product_by_name(self, name: str):
+    def __contains__(self, product: object) -> bool:
+        return product in self.products
+
+    def __add__(self, other):
+        if not isinstance(other, Store):
+            return NotImplemented
+        return Store(self.products + other.products)
+
+    def find_product_by_name(self, name: str) -> Product:
         for product in self.products:
             if product.name == name:
                 return product
         raise AttributeError(f"Product {name} has not been added")
 
-    def order(self,shopping_list) -> float:
-        stored_enough :bool = False
-        total_price :float = 0
-
+    def order(self, shopping_list: list[tuple[Product, int]]) -> float:
+        quantities: dict[Product, int] = {}
         for product, quantity in shopping_list:
-            if not any(item.name == product.name for item in self.products):
-                raise AttributeError(f"Product {product.name} has not been added")
-            target_product = self.find_product_by_name(product.name)
-            if isinstance(target_product, NonStockedProduct):
-                total_price += target_product.get_total_price(quantity)
-                continue
-            stored_enough = target_product.quantity > quantity
-            if not stored_enough:
-                raise ValueError(f"Not Enough {product.name} in stock!")
-            total_price += target_product.get_total_price(quantity)
-            target_product.quantity -= quantity
-        return total_price
+            validate_quantity(quantity)
+            target = self.find_product_by_name(product.name)
+            quantities[target] = quantities.get(target, 0) + quantity
+
+        # Check every line, including its price, before changing any stock.
+        for product, quantity in quantities.items():
+            product.validate_purchase(quantity)
+        total = round(sum(product.get_total_price(quantity)
+                          for product, quantity in quantities.items()), 2)
+        for product, quantity in quantities.items():
+            product.buy(quantity)
+        return total
